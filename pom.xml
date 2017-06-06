@@ -7,6 +7,7 @@
     <groupId>pw.codehusky</groupId>
     <artifactId>HuskyCratesConverter</artifactId>
     <version>0.1.0</version>
+    <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
@@ -22,6 +23,20 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>pw.codehusky.HuskyCratesConverter.HuskyCratesConverter</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
         </plugins>
