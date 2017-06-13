@@ -102,21 +102,27 @@ public class HuskyCratesConverter extends JPanel
                 log.append("name: " + oldCrate.getNode("name").getString() + "\n");
                 log.append("itemCount: " + oldCrate.getNode("items").getChildrenList().size() + "\n");
                 log.append("--- Starting Conversion ---\n");
-                convertedCrateConfig.getNode("crates",key,"name").setValue(oldCrate.getNode("name").getString());
+                convertedCrateConfig.getNode("crates",key,"name").setValue(oldCrate.getNode("name").getString("Unnamed Crate").replaceAll("§","&"));
+                convertedCrateConfig.getNode("crates",key,"type").setValue(oldCrate.getNode("type").getString("Spinner"));
                 java.util.List<? extends CommentedConfigurationNode> items = oldCrate.getNode("items").getChildrenList();
                 double count = 0;
                 DecimalFormat df = new DecimalFormat("#.00");
                 for(CommentedConfigurationNode oldItem : items){
                     CommentedConfigurationNode item = crate.getNode("items").getAppendedNode();
-                    item.getNode("name").setValue(oldItem.getNode("name").getValue());
+                    item.getNode("name").setValue(oldItem.getNode("name").getString("Unnamed Crate").replaceAll("§","&"));
                     item.getNode("count").setValue(oldItem.getNode("amount").getValue());
                     item.getNode("huskydata","weight").setValue(oldItem.getNode("chance").getValue());
                     item.getNode("id").setValue(oldItem.getNode("id").getValue());
-                    item.getNode("lore").getAppendedNode().setValue(oldItem.getNode("lore").getValue());
+                    if(!oldItem.getNode("lore").isVirtual()) {
+                        item.getNode("lore").getAppendedNode().setValue(oldItem.getNode("lore").getValue().toString().replaceAll("§", "&"));
+                    }
                     item.getNode("formatversion").setValue(1);
+                    CommentedConfigurationNode reward = item.getNode("huskydata","rewards").getAppendedNode();
                     if(!oldItem.getNode("command").isVirtual()){
-                        item.getNode("huskydata","reward","type").setValue("command");
-                        item.getNode("huskydata","reward","command").setValue(oldItem.getNode("command").getValue());
+                        reward.getNode("type").setValue("command");
+                        reward.getNode("command").setValue(oldItem.getNode("command").getValue());
+                    }else{
+                        reward.getNode("type").setValue("item");
                     }
                     count++;
                     log.append(df.format((count / items.size())*100) + "%" + " -- " + oldItem.getNode("name").getValue()  + "\n");
