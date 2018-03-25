@@ -1,5 +1,6 @@
 package pw.codehusky.HuskyCratesConverter;
 
+import com.sun.javafx.image.IntPixelGetter;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -12,6 +13,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /*
  * FileChooserDemo.java uses these files:
@@ -139,8 +143,36 @@ public class HuskyCratesConverter extends JPanel
 
                 if(!oldCrateNode.getNode("options","keyID").isVirtual()){
                     crateNode.getNode("localKey","id").setValue(oldCrateNode.getNode("options","keyID").getValue());
+                    crateNode.getNode("localKey","name").setValue(name + "&r Key");
                 }
 
+                java.util.List<Integer> color1 = Arrays.asList(255,0,0);
+                List<Integer> color2 = Arrays.asList(100,100,100);
+                if(!oldCrateNode.getNode("options","particle1").isVirtual()){
+                    color1 = Arrays.asList(oldCrateNode.getNode("options","particle1","color",0).getInt(255),
+                            oldCrateNode.getNode("options","particle1","color",1).getInt(0),
+                            oldCrateNode.getNode("options","particle1","color",2).getInt(0));
+                }
+                if(!oldCrateNode.getNode("options","particle2").isVirtual()){
+                    color2 = Arrays.asList(oldCrateNode.getNode("options","particle2","color",0).getInt(100),
+                            oldCrateNode.getNode("options","particle1","particle2",1).getInt(100),
+                            oldCrateNode.getNode("options","particle1","particle2",2).getInt(100));
+                }
+                ConfigurationNode effectNode = crateNode.getNode("effects","idle");
+
+                ConfigurationNode particle1 = effectNode.getNode("particles").getAppendedNode();
+                particle1.getNode("type").setValue("minecraft:redstone_dust");
+                particle1.getNode("animationPreset").setValue("orbit");
+                particle1.getNode("color").getAppendedNode().setValue(color1.get(0));
+                particle1.getNode("color").getAppendedNode().setValue(color1.get(1));
+                particle1.getNode("color").getAppendedNode().setValue(color1.get(2));
+
+                ConfigurationNode particle2 = effectNode.getNode("particles").getAppendedNode();
+                particle2.getNode("type").setValue("minecraft:redstone_dust");
+                particle2.getNode("animationPreset").setValue("orbit");
+                particle2.getNode("color").getAppendedNode().setValue(color2.get(0));
+                particle2.getNode("color").getAppendedNode().setValue(color2.get(1));
+                particle2.getNode("color").getAppendedNode().setValue(color2.get(2));
                 log.append("\n");
             }
 
