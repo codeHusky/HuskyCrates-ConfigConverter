@@ -155,8 +155,8 @@ public class HuskyCratesConverter extends JPanel
                 }
                 if(!oldCrateNode.getNode("options","particle2").isVirtual()){
                     color2 = Arrays.asList(oldCrateNode.getNode("options","particle2","color",0).getInt(100),
-                            oldCrateNode.getNode("options","particle1","particle2",1).getInt(100),
-                            oldCrateNode.getNode("options","particle1","particle2",2).getInt(100));
+                            oldCrateNode.getNode("options","particle2","color",1).getInt(100),
+                            oldCrateNode.getNode("options","particle2","color",2).getInt(100));
                 }
                 ConfigurationNode effectNode = crateNode.getNode("effects","idle");
 
@@ -181,7 +181,7 @@ public class HuskyCratesConverter extends JPanel
 
                     ConfigurationNode displayItem = slot.getNode("displayItem");
                     displayItem.getNode("count").setValue(item.getNode("count").getValue());
-                    displayItem.getNode("id").setValue(item.getNode("id").getValue());
+                    displayItem.getNode("id").setValue(item.getNode("id").getValue()); //TODO: CHECK IF WE NEED TO STRIP DAMAGE VALUE
                     displayItem.getNode("lore").setValue(item.getNode("lore").getValue());
                     displayItem.getNode("name").setValue(item.getNode("name").getValue());
                     displayItem.getNode("enchantments").setValue(item.getNode("enchants").getValue());
@@ -203,7 +203,7 @@ public class HuskyCratesConverter extends JPanel
                                     ConfigurationNode oldRewardItem = oldReward.getNode("overrideItem");
                                     ConfigurationNode rewardItem = reward.getNode("item");
                                     rewardItem.getNode("count").setValue(oldRewardItem.getNode("count").getValue());
-                                    rewardItem.getNode("id").setValue(oldRewardItem.getNode("id").getValue());
+                                    rewardItem.getNode("id").setValue(oldRewardItem.getNode("id").getValue()); //TODO: CHECK IF WE NEED TO STRIP DAMAGE VALUE
                                     rewardItem.getNode("lore").setValue(oldRewardItem.getNode("lore").getValue());
                                     rewardItem.getNode("name").setValue(oldRewardItem.getNode("name").getValue());
                                     rewardItem.getNode("enchantments").setValue(oldRewardItem.getNode("enchants").getValue());
