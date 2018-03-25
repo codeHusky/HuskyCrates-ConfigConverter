@@ -1,5 +1,6 @@
 package pw.codehusky.HuskyCratesConverter;
 
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -88,48 +89,61 @@ public class HuskyCratesConverter extends JPanel
             //Handle save button action.
         } else if (e.getSource() == convertButton) {
             convertedCrateConfig = crateConfigLoader.createEmptyNode();
-            log.setText("");
-            //convert!
-            for(Object key : crateConfig.getNode("crates").getChildrenMap().keySet()){
-                CommentedConfigurationNode oldCrate = crateConfig.getNode("crates",key);
-                CommentedConfigurationNode crate = convertedCrateConfig.getNode("crates",key);
-                log.append("--- Crate Info ---\n");
-                if(oldCrate.getNode("items").getChildrenList().get(0).getNode("formatversion").isVirtual()){
-                    log.append("config version: v0\n");
-                }else{
-                    log.append("config version: v" + oldCrate.getNode("items").getChildrenList().get(0).getNode("formatversion").getString("ERR") + "\n");
-                }
-                log.append("name: " + oldCrate.getNode("name").getString() + "\n");
-                log.append("itemCount: " + oldCrate.getNode("items").getChildrenList().size() + "\n");
-                log.append("--- Starting Conversion ---\n");
-                convertedCrateConfig.getNode("crates",key,"name").setValue(oldCrate.getNode("name").getString("Unnamed Crate").replaceAll("§","&"));
-                convertedCrateConfig.getNode("crates",key,"type").setValue(oldCrate.getNode("type").getString("Spinner"));
-                java.util.List<? extends CommentedConfigurationNode> items = oldCrate.getNode("items").getChildrenList();
-                double count = 0;
-                DecimalFormat df = new DecimalFormat("#.00");
-                for(CommentedConfigurationNode oldItem : items){
-                    CommentedConfigurationNode item = crate.getNode("items").getAppendedNode();
-                    item.getNode("name").setValue(oldItem.getNode("name").getString("Unnamed Crate").replaceAll("§","&"));
-                    item.getNode("count").setValue(oldItem.getNode("amount").getValue());
-                    item.getNode("huskydata","weight").setValue(oldItem.getNode("chance").getValue());
-                    item.getNode("id").setValue(oldItem.getNode("id").getValue());
-                    if(!oldItem.getNode("lore").isVirtual()) {
-                        item.getNode("lore").getAppendedNode().setValue(oldItem.getNode("lore").getValue().toString().replaceAll("§", "&"));
-                    }
-                    item.getNode("formatversion").setValue(1);
-                    CommentedConfigurationNode reward = item.getNode("huskydata","rewards").getAppendedNode();
-                    if(!oldItem.getNode("command").isVirtual()){
-                        reward.getNode("type").setValue("command");
-                        reward.getNode("command").setValue(oldItem.getNode("command").getValue());
-                    }else{
-                        reward.getNode("type").setValue("item");
-                    }
-                    count++;
-                    log.append(df.format((count / items.size())*100) + "%" + " -- " + oldItem.getNode("name").getValue()  + "\n");
-                }
-                log.append("--- Conversion Completed ---\n");
-                //JOptionPane.showMessageDialog(null,"itemCount: " + crate.getNode("items").getChildrenList().size(),crate.getNode("name").getString(),JOptionPane.PLAIN_MESSAGE);
+            log.setText("-- Conversion starting --\n\n");
+
+            if(crateConfig.getNode("crates").isVirtual()){
+                log.append("-- Failed! --\nNo crates{} object found in this config. Aborting.\n");
+                return;
             }
+
+            for(ConfigurationNode oldCrateNode : crateConfig.getNode("crates").getChildrenMap().values()){
+                String name = oldCrateNode.getNode("name").getString();
+                String id = oldCrateNode.getKey().toString();
+                String viewType = oldCrateNode.getNode("type").getString("spinner").toLowerCase();
+                Boolean isFree = oldCrateNode.getNode("options","freeCrate").getBoolean(false);
+                Long useCooldown = oldCrateNode.getNode("options","freeCrateDelay").getLong();
+
+
+                log.append("-- Crate Information Begin --\nName: " + ((name != null)?name:"NONE") + "\nID: " + id + "\nItems: " + oldCrateNode.getNode("items").getChildrenList().size() + "\nFree: " + isFree.toString() + "\nCooldown Time: " + ((useCooldown > 0)?useCooldown:"None") + "\n-- Crate Information End --\n");
+
+                ConfigurationNode crateNode = convertedCrateConfig.getNode(id);
+
+                crateNode.getNode("name").setValue(name);
+                crateNode.getNode("hologram","lines").getAppendedNode().setValue(name);
+
+                crateNode.getNode("free").setValue(isFree);
+                crateNode.getNode("cooldownSeconds").setValue(useCooldown);
+
+                crateNode.getNode("viewType").setValue(viewType);
+                if(!oldCrateNode.getNode("spinnerOptions").isVirtual()){
+                    crateNode.getNode("viewOptions","tickDelayMultiplier").setValue(oldCrateNode.getNode("spinnerOptions","dampening").getValue());
+                    crateNode.getNode("viewOptions","ticksToSelection").setValue(oldCrateNode.getNode("spinnerOptions","maxClicks").getValue());
+                    Integer maxMod = null;
+                    Integer minMod = null;
+                    if(!oldCrateNode.getNode("spinnerOptions","maxClickModifier").isVirtual()){
+                        maxMod = oldCrateNode.getNode("spinnerOptions","maxClickModifier").getInt();
+                    }
+                    if(!oldCrateNode.getNode("spinnerOptions","minClickModifier").isVirtual()){
+                        minMod = oldCrateNode.getNode("spinnerOptions","minClickModifier").getInt();
+                    }
+                    if(maxMod != null && minMod != null){
+                        crateNode.getNode("viewOptions","ticksToSelectionVariance").setValue(Math.max(Math.abs(maxMod),Math.abs(minMod)));
+                    }else if(maxMod != null){
+                        crateNode.getNode("viewOptions","ticksToSelectionVariance").setValue(Math.abs(maxMod));
+                    }else if(minMod != null){
+                        crateNode.getNode("viewOptions","ticksToSelectionVariance").setValue(Math.abs(minMod));
+                    }
+                }
+
+                crateNode.getNode("useLocalKey").setValue(true);
+
+                if(!oldCrateNode.getNode("options","keyID").isVirtual()){
+                    crateNode.getNode("localKey","id").setValue(oldCrateNode.getNode("options","keyID").getValue());
+                }
+
+                log.append("\n");
+            }
+
             log.append("-- Saving new config to converted.conf --\n");
             try {
                 crateConvertedLoader.save(convertedCrateConfig);
