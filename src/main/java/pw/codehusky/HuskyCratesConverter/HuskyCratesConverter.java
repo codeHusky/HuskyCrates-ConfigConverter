@@ -173,6 +173,51 @@ public class HuskyCratesConverter extends JPanel
                 particle2.getNode("color").getAppendedNode().setValue(color2.get(0));
                 particle2.getNode("color").getAppendedNode().setValue(color2.get(1));
                 particle2.getNode("color").getAppendedNode().setValue(color2.get(2));
+                log.append("\n-- Crate info Converted. Converting items now. --\n");
+                for(ConfigurationNode item : oldCrateNode.getNode("items").getChildrenList()){
+                    ConfigurationNode slot = crateNode.getNode("slots").getAppendedNode();
+
+                    slot.getNode("chance").setValue(item.getNode("huskydata","weight").getDouble(1));
+
+                    ConfigurationNode displayItem = slot.getNode("displayItem");
+                    displayItem.getNode("count").setValue(item.getNode("count").getValue());
+                    displayItem.getNode("id").setValue(item.getNode("id").getValue());
+                    displayItem.getNode("lore").setValue(item.getNode("lore").getValue());
+                    displayItem.getNode("name").setValue(item.getNode("name").getValue());
+                    displayItem.getNode("enchantments").setValue(item.getNode("enchants").getValue());
+                    displayItem.getNode("nbt").setValue(item.getNode("nbt").getValue());
+
+                    for(ConfigurationNode oldReward : item.getNode("huskydata","rewards").getChildrenList()){
+                        ConfigurationNode reward = slot.getNode("rewards").getAppendedNode();
+                        switch(oldReward.getNode("type").getString()){
+                            case "command":
+                                reward.getNode("type").setValue("servercommand");
+                                if(oldReward.getNode("command").isVirtual()){
+                                    log.append("!!WARNING!! A command was set to \"INVALID COMMAND FROM HUSKYCONVERTER\". Please fix this manually.\n");
+                                }
+                                reward.getNode("data").setValue(oldReward.getNode("command").getString("say INVALID COMMAND FROM HUSKYCONVERTER"));
+                                break;
+                            case "item":
+                                reward.getNode("type").setValue("item");
+                                if(!oldReward.getNode("overrideItem").isVirtual()){
+                                    ConfigurationNode oldRewardItem = oldReward.getNode("overrideItem");
+                                    ConfigurationNode rewardItem = reward.getNode("item");
+                                    rewardItem.getNode("count").setValue(oldRewardItem.getNode("count").getValue());
+                                    rewardItem.getNode("id").setValue(oldRewardItem.getNode("id").getValue());
+                                    rewardItem.getNode("lore").setValue(oldRewardItem.getNode("lore").getValue());
+                                    rewardItem.getNode("name").setValue(oldRewardItem.getNode("name").getValue());
+                                    rewardItem.getNode("enchantments").setValue(oldRewardItem.getNode("enchants").getValue());
+                                    rewardItem.getNode("nbt").setValue(oldRewardItem.getNode("nbt").getValue());
+                                }else if(!oldReward.getNode("overrideCount").isVirtual()){
+                                    reward.getNode("item").setValue(displayItem);
+                                    reward.getNode("item","count").setValue(oldReward.getNode("overrideCount").getInt(1));
+                                }
+                                break;
+                        }
+                    }
+
+
+                }
                 log.append("\n");
             }
 
