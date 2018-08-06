@@ -213,7 +213,7 @@ public class HuskyCratesConverter extends JPanel
                         displayItem.getNode("name").setValue(item.getNode("name").getValue());
                         displayItem.getNode("enchantments").setValue(item.getNode("enchants").getValue());
                         displayItem.getNode("nbt").setValue(item.getNode("nbt").getValue());
-
+                        boolean announce = item.getNode("huskydata","announce").getBoolean(false);
                         for(ConfigurationNode oldReward : item.getNode("huskydata","rewards").getChildrenList()){
                             ConfigurationNode reward = slot.getNode("rewards").getAppendedNode();
                             switch(oldReward.getNode("type").getString()){
@@ -242,6 +242,15 @@ public class HuskyCratesConverter extends JPanel
                                     break;
                             }
                         }
+                        if(announce){
+                            ConfigurationNode announceReward = slot.getNode("rewards").getAppendedNode();
+                            announceReward.getNode("type").setValue("servermessage");
+                            announceReward.getNode("data").setValue(crateConfig.getNode("lang","rewardAnnounceMessage").getString("").replace("%c",name).replace("%prefix%",crateConfig.getNode("lang","prefix").getString("")).replace("%r",item.getNode("name").getString()));
+                        }
+
+                        ConfigurationNode winNotice = slot.getNode("rewards").getAppendedNode();
+                        winNotice.getNode("type").setValue("usermessage");
+                        winNotice.getNode("data").setValue(crateConfig.getNode("lang","rewardMessage").getString("").replace("%c",name).replace("%prefix%",crateConfig.getNode("lang","prefix").getString("")).replace("%r",item.getNode("name").getString()));
 
 
                     }
@@ -283,7 +292,7 @@ public class HuskyCratesConverter extends JPanel
      */
     private static void createAndShowGUI() {
         //Create and set up the window.
-        JFrame frame = new JFrame("HuskyCrates Config Converter v0.3.0");
+        JFrame frame = new JFrame("HuskyCrates Config Converter v0.4.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Add content to the window.

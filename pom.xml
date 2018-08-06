@@ -6,7 +6,7 @@
 
     <groupId>pw.codehusky</groupId>
     <artifactId>HuskyCratesConverter</artifactId>
-    <version>0.2.0</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
