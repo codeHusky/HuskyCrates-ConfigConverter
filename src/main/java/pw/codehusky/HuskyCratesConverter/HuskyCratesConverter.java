@@ -245,12 +245,26 @@ public class HuskyCratesConverter extends JPanel
                         if(announce){
                             ConfigurationNode announceReward = slot.getNode("rewards").getAppendedNode();
                             announceReward.getNode("type").setValue("servermessage");
-                            announceReward.getNode("data").setValue(crateConfig.getNode("lang","rewardAnnounceMessage").getString("").replace("%c",name).replace("%prefix%",crateConfig.getNode("lang","prefix").getString("")).replace("%r",item.getNode("name").getString()));
+                            announceReward.getNode("data").setValue(
+                                    (
+                                        (!oldCrateNode.getNode("lang","rewardAnnounceMessage").isVirtual())?
+                                                oldCrateNode.getNode("lang","rewardAnnounceMessage").getString("%p just won %R&r from a %C&r!"):
+                                                crateConfig.getNode("lang","rewardAnnounceMessage").getString("%p just won %R&r from a %C&r!")
+                                    ).replace("%c",name).replace("%prefix%", (
+                                            (!oldCrateNode.getNode("lang","prefix").isVirtual())?
+                                                    oldCrateNode.getNode("lang","prefix").getString(""):
+                                                    crateConfig.getNode("lang","prefix").getString("")
+                                    )).replace("%r",item.getNode("name").getString()));
                         }
 
                         ConfigurationNode winNotice = slot.getNode("rewards").getAppendedNode();
                         winNotice.getNode("type").setValue("usermessage");
-                        winNotice.getNode("data").setValue(crateConfig.getNode("lang","rewardMessage").getString("").replace("%c",name).replace("%prefix%",crateConfig.getNode("lang","prefix").getString("")).replace("%r",item.getNode("name").getString()));
+                        winNotice.getNode("data").setValue(
+                                (
+                                        (!oldCrateNode.getNode("lang","rewardMessage").isVirtual())?
+                                                oldCrateNode.getNode("lang","rewardMessage").getString("%prefix%You won %a %R&r from a %C&r!"):
+                                                crateConfig.getNode("lang","rewardMessage").getString("%prefix%You won %a %R&r from a %C&r!")
+                                ).replace("%c",name).replace("%prefix%", ((!oldCrateNode.getNode("lang","prefix").isVirtual())?oldCrateNode.getNode("lang","prefix").getString(""):crateConfig.getNode("lang","prefix").getString("") )).replace("%r",item.getNode("name").getString()));
 
 
                     }
